@@ -14,8 +14,6 @@ function App() {
   const contacts = useSelector((state) => state.phonebook.contacts.items);
   const filter = useSelector((state) => state.filters.name);
 
-  console.log("Filter value:", filter);
-
   const filteredContacts = contacts.filter(
     (contact) =>
       contact.name &&

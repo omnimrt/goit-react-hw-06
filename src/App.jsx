@@ -1,38 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import "./App.css";
 import ContactList from "./components/ContactList/ContactList";
-import userData from "./users.json";
 import SearchBox from "./components/SearchBox/SearchBox";
 import ContactForm from "./components/ContactForm/ContactForm";
 import { nanoid } from "nanoid";
 import { useSelector } from "react-redux";
-import {
-  addContact,
-  deleteContact,
-  setFilter,
-} from "./redux/phonebook/phonebookReducer";
-
+import { addContact, deleteContact } from "./redux/contactsSlice";
+import { setFilter } from "./redux/filtersSlice";
 function App() {
   const dispatch = useDispatch();
-  // const [users, setUsers] = useState(() => {
-  //   const stringifiedUsers = localStorage.getItem("users");
-  //   if (!stringifiedUsers) return userData;
 
-  //   const parsedUsers = JSON.parse(stringifiedUsers);
-  //   return parsedUsers;
-  // });
+  const contacts = useSelector((state) => state.phonebook.contacts.items);
+  const filter = useSelector((state) => state.filters.name);
 
-  // const [filter, setFilter] = useState("");
+  console.log("Filter value:", filter);
 
-  const contacts = useSelector((state) => state.phonebook.contacts);
-  const filters = useSelector((state) => state.phonebook.filter);
+  const filteredContacts = contacts.filter(
+    (contact) =>
+      contact.name &&
+      contact.name.toLowerCase().includes((filter || "").toLowerCase())
+  );
 
   useEffect(() => {
-    localStorage.setItem("users", JSON.stringify(users));
-  }, [users]);
-
-  // User adding functionality
+    localStorage.setItem("users", JSON.stringify(contacts));
+  }, [contacts]);
 
   const onAddUser = (formData) => {
     const finalUser = {
@@ -42,26 +34,13 @@ function App() {
     dispatch(addContact(finalUser));
   };
 
-  // User deleting functionality
-
   const onUserDelete = (userId) => {
     dispatch(deleteContact(userId));
   };
 
-  // Filter functionality
-
   const onChangeFilter = (event) => {
     dispatch(setFilter(event.target.value));
   };
-
-  const filteredUsers = users.filter((user) => {
-    const nameIncludesFilter =
-      user.name && user.name.toLowerCase().includes(filter.toLowerCase());
-    const numberIncludesFilter =
-      typeof user.number === "string" &&
-      user.number.toLowerCase().includes(filter.toLowerCase());
-    return nameIncludesFilter || numberIncludesFilter;
-  });
 
   return (
     <>
@@ -69,7 +48,7 @@ function App() {
       <br />
       <ContactForm onAddUser={onAddUser} />
       <SearchBox onChangeFilter={onChangeFilter} value={filter} />
-      <ContactList users={filteredUsers} onUserDelete={onUserDelete} />
+      <ContactList users={filteredContacts} onUserDelete={onUserDelete} />
     </>
   );
 }
